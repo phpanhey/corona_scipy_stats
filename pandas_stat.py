@@ -18,10 +18,16 @@ def extractReproductionNumbers(state):
 
     return {
         "dates": date_of_reproduction_numbers,
-        "reproduction_numbers": reproduction_numbers,
+        "numbers": reproduction_numbers,
     }
 
 
-reproduction_numbers = extractReproductionNumbers("bayern")
-print(reproduction_numbers)
-# print(json.dumps(infected_data, indent=4))
+def splitSeperationNumbersByDate(reproduction_numbers_dataset, date_str):
+    entry_index = reproduction_numbers_dataset['dates'].index(date_str)
+    no_lockdown = reproduction_numbers_dataset['numbers'][:entry_index]
+    lockdown = [x for x in reproduction_numbers_dataset['numbers'] if x not in no_lockdown]
+    return no_lockdown, lockdown
+
+
+reproduction_numbers_dataset = extractReproductionNumbers("bremen")
+splitSeperationNumbersByDate(reproduction_numbers_dataset, "2020-03-12")
