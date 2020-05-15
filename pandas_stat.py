@@ -2,7 +2,9 @@ import requests
 import bs4
 from bs4 import BeautifulSoup
 import json
-import statistics
+import numpy
+from scipy import stats
+import matplotlib.pyplot as plt
 
 
 def extractReproductionNumbers(state):
@@ -39,14 +41,45 @@ def splitSeperationNumbersByDate(reproduction_numbers_dataset, date_str):
     return no_lockdown, lockdown
 
 
-state = "bremen"
-lockdown_date = "2020-03-24"
-reproduction_numbers_dataset = extractReproductionNumbers(state)
-no_lockdown, lockdown = splitSeperationNumbersByDate(
-    reproduction_numbers_dataset, lockdown_date
-)
+states = [
+    "deutschland",
+    "baden-württemberg",
+    "bayern",
+    "berlin",
+    "brandenburg",
+    "bremen",
+    "hamburg",
+    "hessen",
+    "mecklenburg-vorpommern",
+    "niedersachsen",
+    "nordrhein-westfalen",
+    "rheinland-pfalz",
+    "saarland",
+    "sachsen",
+    "sachsen-anhalt",
+    "schleswig-holstein",
+    "thüringen",
+]
+for current_state in states:
+    # current_state = "bremen"
+    lockdown_date = "2020-03-24"
+    reproduction_numbers_dataset = extractReproductionNumbers(current_state)
+    no_lockdown, lockdown = splitSeperationNumbersByDate(
+        reproduction_numbers_dataset, lockdown_date
+    )
+    t_val, p_val = stats.ttest_ind(no_lockdown, lockdown, equal_var=False)
+    if p_val > 0.05:
+        print(current_state + " :lockdown KEINEN signifikaten einfluss auf r!!")
+    else:
+        pass
+        # print(current_state + " :lockdown signifikaten einfluss auf r")
 
 
-print("mittelwert r no_lockdown in " + state + ": " + str(statistics.mean(no_lockdown)))
-print('####')
-print("mittelwert r lockdown in " + state + ": " + str(statistics.mean(lockdown)))
+# print("mittelwert r no_lockdown in " + state + ": " + str(numpy.mean(no_lockdown)))
+# print('####')
+# print("mittelwert r lockdown in " + state + ": " + str(numpy.mean(lockdown)))
+# print("standardabweichung r no_lockdown in " + state + ": " + str(numpy.std(no_lockdown)))
+# print('####')
+# print("standardabweichung r lockdown in " + state + ": " + str(numpy.std(lockdown)))
+# plt.bar(['no_lockdown', 'lockdown'], [numpy.mean(no_lockdown), numpy.mean(lockdown)])
+# plt.show()
