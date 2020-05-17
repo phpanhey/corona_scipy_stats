@@ -41,6 +41,31 @@ def splitSeperationNumbersByDate(reproduction_numbers_dataset, date_str):
     return no_lockdown, lockdown
 
 
+def plotDiagramm(label, data):
+    plt.bar(label["category"], data)
+    plt.title(label["title"])
+    plt.xlabel(label["xlabel"])
+    plt.ylabel(label["ylabel"])
+    plt.show()
+
+
+def calculateMeanAndStd(no_lockdown, lockdown):
+    return {
+        "no_lockdown": {"mean": numpy.mean(no_lockdown), "std": numpy.std(no_lockdown)},
+        "lockdown": {"mean": numpy.mean(lockdown), "std": numpy.std(lockdown)},
+    }
+
+
+def welch_ttest(x, y):
+    ## Welch-Satterthwaite Degrees of Freedom ##
+    dof = (x.var() / x.size + y.var() / y.size) ** 2 / (
+        (x.var() / x.size) ** 2 / (x.size - 1) + (y.var() / y.size) ** 2 / (y.size - 1)
+    )
+
+    t, p = stats.ttest_ind(x, y, equal_var=False)
+    return dof, t, p
+
+
 states = [
     "deutschland",
     "baden-württemberg",
@@ -60,26 +85,30 @@ states = [
     "schleswig-holstein",
     "thüringen",
 ]
-for current_state in states:
-    # current_state = "bremen"
-    lockdown_date = "2020-03-24"
-    reproduction_numbers_dataset = extractReproductionNumbers(current_state)
-    no_lockdown, lockdown = splitSeperationNumbersByDate(
-        reproduction_numbers_dataset, lockdown_date
-    )
-    t_val, p_val = stats.ttest_ind(no_lockdown, lockdown, equal_var=False)
-    if p_val > 0.05:
-        print(current_state + " :lockdown KEINEN signifikaten einfluss auf r!!")
-    else:
-        pass
-        # print(current_state + " :lockdown signifikaten einfluss auf r")
+# for current_state in states:
+current_state = "bremen"
+lockdown_date = "2020-03-24"
+
+reproduction_numbers_dataset = extractReproductionNumbers(current_state)
+
+no_lockdown, lockdown = splitSeperationNumbersByDate(
+    reproduction_numbers_dataset, lockdown_date
+)
+
+mean_and_std = calculateMeanAndStd(no_lockdown, lockdown)
+dof, t_val, p_val = welch_ttest(numpy.array(no_lockdown), numpy.array(lockdown))
+
+if p_val > 0.05:
+    print(current_state + " :lockdown KEINEN signifikaten einfluss auf r!!")
 
 
-# print("mittelwert r no_lockdown in " + state + ": " + str(numpy.mean(no_lockdown)))
-# print('####')
-# print("mittelwert r lockdown in " + state + ": " + str(numpy.mean(lockdown)))
-# print("standardabweichung r no_lockdown in " + state + ": " + str(numpy.std(no_lockdown)))
-# print('####')
-# print("standardabweichung r lockdown in " + state + ": " + str(numpy.std(lockdown)))
-# plt.bar(['no_lockdown', 'lockdown'], [numpy.mean(no_lockdown), numpy.mean(lockdown)])
-# plt.show()
+plotDiagramm(
+    {
+        "category": ["no_lockdown (< 24.03.20)", "lockdown (>= 24.03.20)"],
+        "title": "corona reproduktionszahl vor / während des lockdowns in "
+        + current_state,
+        "xlabel": "zustandunterscheidungen",
+        "ylabel": "reproduktionszahl r",
+    },
+    [numpy.mean(no_lockdown), numpy.mean(lockdown)],
+)
