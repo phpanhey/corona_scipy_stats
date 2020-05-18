@@ -66,6 +66,13 @@ def welch_ttest(x, y):
     return dof, t, p
 
 
+def addAcceptOrRejectHypothesisText(p_val):
+    if p_val > 0.1:
+        return " -> h1 wird verworfen."
+
+    return " -> h0 wird verworfen."
+
+
 states = [
     "deutschland",
     "baden-württemberg",
@@ -98,16 +105,26 @@ no_lockdown, lockdown = splitSeperationNumbersByDate(
 mean_and_std = calculateMeanAndStd(no_lockdown, lockdown)
 dof, t_val, p_val = welch_ttest(numpy.array(no_lockdown), numpy.array(lockdown))
 
-if p_val > 0.05:
-    print(current_state + " :lockdown KEINEN signifikaten einfluss auf r!!")
-
+if p_val > 0.1:
+    print(
+        "short: das lockdown (corona präventions maßnahmen) hat keinen signifikanten einfluss auf die reproduktionszahl r in "
+        + current_state
+        + ". \n"
+        + "methodik:  ich führte einen hypothesentest (Welch-Test, Zweistichproben-t-Test) durch,"
+        + "um die reproduktionszahl r vor dem lockdown (datum keiner 24.03.20) und während des lockdowns (datum größer gleich 24.03.20) zu vergleichen."
+        + "es gibt keinen signifikanten unterschied für die Reproduktionszahl "
+        + f"vor dem lockdown (M={mean_and_std['no_lockdown']['mean']:.3f}, SD={mean_and_std['no_lockdown']['std']:.3f})"
+        + f"und während des lockdowns (M={mean_and_std['lockdown']['mean']:.3f}, SD={mean_and_std['lockdown']['std']:.3f})"
+        + f"; t({dof:.0f})={t_val:.3f}, p = {p_val:.3f}."
+    )
 
 plotDiagramm(
     {
         "category": ["no_lockdown (< 24.03.20)", "lockdown (>= 24.03.20)"],
         "title": "corona reproduktionszahl vor / während des lockdowns in "
         + current_state,
-        "xlabel": "zustandunterscheidungen",
+        "xlabel": f"welsh t-test: t({dof:.0f})={t_val:.3f}, p = {p_val:.3f}"
+        + addAcceptOrRejectHypothesisText(p_val),
         "ylabel": "reproduktionszahl r",
     },
     [numpy.mean(no_lockdown), numpy.mean(lockdown)],
