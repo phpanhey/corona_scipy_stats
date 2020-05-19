@@ -67,10 +67,10 @@ def welch_ttest(x, y):
 
 
 def addAcceptOrRejectHypothesisText(p_val):
-    if p_val > 0.1:
-        return " -> h1 wird verworfen."
+    if p_val > 0.05:
+        return " ⇒ keinen signifikanten unterschied in r."
 
-    return " -> h0 wird verworfen."
+    return " ⇒ signifikanten unterschied in r."
 
 
 states = [
@@ -101,7 +101,7 @@ no_lockdown, lockdown = splitSeperationNumbersByDate(
 )
 mean_and_std = calculateMeanAndStd(no_lockdown, lockdown)
 dof, t_val, p_val = welch_ttest(numpy.array(no_lockdown), numpy.array(lockdown))
-if p_val >= 0.05:
+if p_val > 0.05:
     print(
         f"{current_state}: Coronamaßnahmen haben keinen signifikanten einfluss auf Reproduktionszahl r"
         + f"(Gruppe1: M={mean_and_std['no_lockdown']['mean']:.3f}, SD={mean_and_std['no_lockdown']['std']:.3f};"
