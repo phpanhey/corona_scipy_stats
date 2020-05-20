@@ -93,7 +93,7 @@ states = [
     "thüringen",
 ]
 # for current_state in states:
-current_state = "bremen"
+current_state = "deutschland"
 lockdown_date = "2020-03-24"
 reproduction_numbers_dataset = extractReproductionNumbers(current_state)
 no_lockdown, lockdown = splitSeperationNumbersByDate(
